@@ -1,12 +1,9 @@
-name: Build Pong-Go Server
+name: Publish Pong-Go Server
 
 on:
   push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+    tags:
+      - 'v*'
 
 jobs:
   build-linux:
@@ -26,8 +23,9 @@ jobs:
         run: |
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o pong-go
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
         with:
-          name: pong-go-linux
-          path: pong-go
+          files: pong-go
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
