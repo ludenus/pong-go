@@ -39,9 +39,17 @@ jobs:
         run: |
           go build -ldflags="-s -w" -o "${{ matrix.binary }}"
 
+      - name: Package archive
+        id: package
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          ARCHIVE="pong-go-${VERSION}-${{ matrix.goos }}-${{ matrix.goarch }}.zip"
+          zip "${ARCHIVE}" "${{ matrix.binary }}"
+          echo "archive=${ARCHIVE}" >> "${GITHUB_OUTPUT}"
+
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ matrix.binary }}
+          files: ${{ steps.package.outputs.archive }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
