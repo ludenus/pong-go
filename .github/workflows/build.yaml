@@ -18,6 +18,12 @@ jobs:
           - goos: linux
             goarch: amd64
             binary: pong-go
+          - goos: darwin
+            goarch: amd64
+            binary: pong-go
+          - goos: darwin
+            goarch: arm64
+            binary: pong-go
           - goos: windows
             goarch: amd64
             binary: pong-go.exe
