@@ -15,6 +15,7 @@ type verboseResponse struct {
 	Timestamp string              `json:"timestamp"`
 	Method    string              `json:"method"`
 	URL       string              `json:"url"`
+	Query     map[string][]string `json:"query"`
 	Headers   map[string][]string `json:"headers"`
 	Body      string              `json:"body"`
 }
@@ -71,7 +72,8 @@ func echoHandler(w http.ResponseWriter, r *http.Request) {
 		resp := verboseResponse{
 			Timestamp: time.Now().Format("2006-01-02T15:04:05.000Z07:00"),
 			Method:    r.Method,
-			URL:       r.URL.String(),
+			URL:       r.URL.Path,
+			Query:     r.URL.Query(),
 			Headers:   r.Header,
 			Body:      bodyStr,
 		}
