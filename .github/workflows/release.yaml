@@ -8,11 +8,19 @@ on:
 permissions:
   contents: write
 
-
 jobs:
-  build-linux:
-    name: Build for Linux
+  build:
+    name: Build for ${{ matrix.goos }}/${{ matrix.goarch }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            binary: pong-go
+          - goos: windows
+            goarch: amd64
+            binary: pong-go.exe
 
     steps:
       - name: Checkout repository
@@ -23,13 +31,17 @@ jobs:
         with:
           go-version: '1.21'
 
-      - name: Build binary for linux/amd64
+      - name: Build binary
+        env:
+          CGO_ENABLED: 0
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
         run: |
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o pong-go
+          go build -ldflags="-s -w" -o "${{ matrix.binary }}"
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
         with:
-          files: pong-go
+          files: ${{ matrix.binary }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
