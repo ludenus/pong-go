@@ -10,6 +10,7 @@ A minimalistic HTTP echo server written in Go, designed for testing and debuggin
   - **Simple Mode**: always responds with `200 OK`.
   - **Verbose Mode**: returns a JSON payload with request details and timestamp.
 - Optional random response delay controlled via CLI flag.
+- Optional random 404 responses controlled via CLI flag.
 
 ## Environment Variables
 
@@ -62,6 +63,14 @@ Add a random delay between `0` and the provided duration (e.g. `5000ms`, `5s`) t
 ```
 ./pong-go --random-delay 5000ms
 ```
+
+### return random 404 responses
+
+Return a `404 Not Found` response for a percentage of requests.
+```
+./pong-go --error-rate 0.33
+```
+Valid values are between `0` and `1`. The default is `0` (no errors).
 
 ### send requests
 ```

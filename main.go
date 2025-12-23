@@ -25,6 +25,7 @@ type verboseResponse struct {
 var (
 	version        = "dev"
 	maxRandomDelay time.Duration
+	errorRate      float64
 )
 
 func getEnvBool(key string, defaultVal bool) bool {
@@ -80,6 +81,12 @@ func echoHandler(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(delay)
 	}
 
+	if errorRate > 0 && rand.Float64() < errorRate {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintln(w, "Not Found")
+		return
+	}
+
 	if verboseResponseMode {
 		resp := verboseResponse{
 			Timestamp: time.Now().Format("2006-01-02T15:04:05.000Z07:00"),
@@ -110,6 +117,7 @@ func main() {
 	shortVersionFlag := flag.Bool("v", false, "print version")
 	longVersionFlag := flag.Bool("version", false, "print version")
 	randomDelayFlag := flag.Duration("random-delay", 0, "max random delay before responding (e.g. 500ms, 2s)")
+	errorRateFlag := flag.Float64("error-rate", 0, "probability of returning HTTP 404 (e.g. 0.33)")
 	flag.Parse()
 
 	if *shortVersionFlag || *longVersionFlag {
@@ -118,7 +126,11 @@ func main() {
 	}
 
 	maxRandomDelay = *randomDelayFlag
-	if maxRandomDelay > 0 {
+	errorRate = *errorRateFlag
+	if errorRate < 0 || errorRate > 1 {
+		log.Fatalf("invalid error-rate: %v (must be between 0 and 1)", errorRate)
+	}
+	if maxRandomDelay > 0 || errorRate > 0 {
 		rand.Seed(time.Now().UnixNano())
 	}
 
