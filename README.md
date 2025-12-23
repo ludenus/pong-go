@@ -24,17 +24,29 @@ The behavior of the server can be customized using the following environment var
 
 ## How to build
 
+To embed a git-describe style version string (tag, nearest tag + short commit, and a `-dirty` suffix for local changes), build from a git checkout and pass the derived value via `-ldflags`.
+
+```
+VERSION=$(git describe --tags --dirty --always --abbrev=7 2>/dev/null || echo dev)
+```
+
 ### faster build
 ```
-go build -o pong-go
+go build -ldflags="-X main.version=${VERSION}" -o pong-go
 ```
 
 ### smaller binary
 ```
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o pong-go
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.version=${VERSION}" -o pong-go
 ```
 
 ## How to use
+
+### check version
+Use `-v` or `--version` to print the embedded version string and exit.
+```
+./pong-go -v
+```
 
 ### run server
 

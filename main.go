@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -19,6 +20,8 @@ type verboseResponse struct {
 	Headers   map[string][]string `json:"headers"`
 	Body      string              `json:"body"`
 }
+
+var version = "dev"
 
 func getEnvBool(key string, defaultVal bool) bool {
 	val := strings.ToLower(os.Getenv(key))
@@ -87,7 +90,23 @@ func echoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func resolveVersion() string {
+	if strings.TrimSpace(version) == "" {
+		return "dev"
+	}
+	return version
+}
+
 func main() {
+	shortVersionFlag := flag.Bool("v", false, "print version")
+	longVersionFlag := flag.Bool("version", false, "print version")
+	flag.Parse()
+
+	if *shortVersionFlag || *longVersionFlag {
+		fmt.Println(resolveVersion())
+		return
+	}
+
 	// Set custom log format for timestamps
 	log.SetFlags(0)
 	log.SetOutput(logWriter{})
@@ -98,7 +117,7 @@ func main() {
 	}
 
 	http.HandleFunc("/", echoHandler)
-	log.Printf("Starting echo server on %s", addr)
+	log.Printf("Starting echo server on %s (version %s)", addr, resolveVersion())
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
 		log.Fatalf("Server failed to start: %v", err)

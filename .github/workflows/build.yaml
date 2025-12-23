@@ -31,11 +31,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
+
+      - name: Derive version string
+        id: version
+        run: echo "version=$(git describe --tags --dirty --always --abbrev=7)" >> "$GITHUB_OUTPUT"
 
       - name: Build binary
         env:
@@ -43,4 +49,5 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          go build -ldflags="-s -w" -o "${{ matrix.binary }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          go build -ldflags="-s -w -X main.version=${VERSION}" -o "${{ matrix.binary }}"
