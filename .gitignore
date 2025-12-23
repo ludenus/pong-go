@@ -1,2 +1,4 @@
-./pong-go
-./pong-go.exe
+pong-go
+pong-go.exe
+
+.gocache

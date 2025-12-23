@@ -9,6 +9,7 @@ A minimalistic HTTP echo server written in Go, designed for testing and debuggin
 - Two response modes:
   - **Simple Mode**: always responds with `200 OK`.
   - **Verbose Mode**: returns a JSON payload with request details and timestamp.
+- Optional random response delay controlled via CLI flag.
 
 ## Environment Variables
 
@@ -53,6 +54,13 @@ Use `-v` or `--version` to print the embedded version string and exit.
 ```
 export PONG_VERBOSE_RESPONSE=true
 ./pong-go
+```
+
+### add random delay before responses
+
+Add a random delay between `0` and the provided duration (e.g. `5000ms`, `5s`) to every request.
+```
+./pong-go --random-delay 5000ms
 ```
 
 ### send requests

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"strings"
@@ -21,7 +22,10 @@ type verboseResponse struct {
 	Body      string              `json:"body"`
 }
 
-var version = "dev"
+var (
+	version        = "dev"
+	maxRandomDelay time.Duration
+)
 
 func getEnvBool(key string, defaultVal bool) bool {
 	val := strings.ToLower(os.Getenv(key))
@@ -71,6 +75,11 @@ func echoHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Print(logBuilder.String())
 
+	if maxRandomDelay > 0 {
+		delay := time.Duration(rand.Int63n(maxRandomDelay.Nanoseconds() + 1))
+		time.Sleep(delay)
+	}
+
 	if verboseResponseMode {
 		resp := verboseResponse{
 			Timestamp: time.Now().Format("2006-01-02T15:04:05.000Z07:00"),
@@ -100,11 +109,17 @@ func resolveVersion() string {
 func main() {
 	shortVersionFlag := flag.Bool("v", false, "print version")
 	longVersionFlag := flag.Bool("version", false, "print version")
+	randomDelayFlag := flag.Duration("random-delay", 0, "max random delay before responding (e.g. 500ms, 2s)")
 	flag.Parse()
 
 	if *shortVersionFlag || *longVersionFlag {
 		fmt.Println(resolveVersion())
 		return
+	}
+
+	maxRandomDelay = *randomDelayFlag
+	if maxRandomDelay > 0 {
+		rand.Seed(time.Now().UnixNano())
 	}
 
 	// Set custom log format for timestamps
